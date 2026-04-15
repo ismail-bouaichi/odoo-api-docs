@@ -1,0 +1,949 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Documentation API Immobilier — Les Résidences Relief</title>
+    <style>
+        :root {
+            --primary: #1a1a2e;
+            --accent: #e94560;
+            --accent2: #0f3460;
+            --bg: #f8f9fa;
+            --card: #ffffff;
+            --code-bg: #1e1e2e;
+            --code-text: #cdd6f4;
+            --success: #40c057;
+            --warning: #fd7e14;
+            --info: #339af0;
+            --border: #dee2e6;
+            --text: #212529;
+            --muted: #868e96;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.7;
+        }
+
+        /* ─── Header ─────────────────────────────────────── */
+        .hero {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--accent2) 50%, var(--accent) 100%);
+            color: white;
+            padding: 60px 0 50px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.03) 1px, transparent 1px);
+            background-size: 30px 30px;
+        }
+        .hero h1 { font-size: 2.8rem; font-weight: 800; letter-spacing: -1px; position: relative; }
+        .hero .subtitle { font-size: 1.15rem; opacity: 0.85; margin-top: 10px; position: relative; }
+        .hero .version-badge {
+            display: inline-block;
+            background: rgba(255,255,255,0.15);
+            padding: 4px 16px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            margin-top: 15px;
+            backdrop-filter: blur(10px);
+            position: relative;
+        }
+
+        /* ─── Container ──────────────────────────────────── */
+        .container { max-width: 1100px; margin: 0 auto; padding: 40px 24px; }
+
+        /* ─── Navigation ─────────────────────────────────── */
+        .nav-bar {
+            background: var(--card);
+            border-bottom: 1px solid var(--border);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+        }
+        .nav-bar .container {
+            padding: 0 24px;
+            display: flex;
+            gap: 0;
+            overflow-x: auto;
+        }
+        .nav-link {
+            padding: 16px 20px;
+            text-decoration: none;
+            color: var(--muted);
+            font-weight: 600;
+            font-size: 0.9rem;
+            white-space: nowrap;
+            border-bottom: 3px solid transparent;
+            transition: all 0.2s;
+        }
+        .nav-link:hover { color: var(--accent); border-bottom-color: var(--accent); }
+
+        /* ─── Section ────────────────────────────────────── */
+        section { margin-bottom: 50px; }
+        .section-title {
+            font-size: 1.6rem;
+            font-weight: 700;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 3px solid var(--accent);
+            display: inline-block;
+        }
+
+        /* ─── Cards ──────────────────────────────────────── */
+        .card {
+            background: var(--card);
+            border-radius: 12px;
+            padding: 30px;
+            margin-bottom: 24px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.04);
+            border: 1px solid var(--border);
+        }
+
+        /* ─── Endpoint ───────────────────────────────────── */
+        .endpoint {
+            background: var(--card);
+            border-radius: 12px;
+            margin-bottom: 30px;
+            border: 1px solid var(--border);
+            overflow: hidden;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.04);
+        }
+        .endpoint-header {
+            padding: 20px 30px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            border-bottom: 1px solid var(--border);
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .endpoint-header:hover { background: var(--bg); }
+        .method {
+            padding: 6px 16px;
+            border-radius: 6px;
+            font-weight: 800;
+            font-size: 0.8rem;
+            letter-spacing: 0.5px;
+            color: white;
+            flex-shrink: 0;
+        }
+        .method.get { background: var(--success); }
+        .method.options { background: var(--info); }
+        .endpoint-path { font-family: 'Cascadia Code', 'Fira Code', monospace; font-size: 1rem; font-weight: 600; }
+        .endpoint-desc { color: var(--muted); font-size: 0.9rem; margin-left: auto; }
+        .endpoint-body { padding: 30px; display: block; }
+        .auth-badge {
+            padding: 3px 10px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            flex-shrink: 0;
+        }
+        .auth-badge.required { background: #fff3bf; color: #e67700; }
+        .auth-badge.public { background: #d3f9d8; color: #2b8a3e; }
+
+        /* ─── Tables ─────────────────────────────────────── */
+        table { width: 100%; border-collapse: collapse; margin: 16px 0; }
+        th { text-align: left; padding: 12px 16px; background: var(--bg); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.5px; color: var(--muted); border-bottom: 2px solid var(--border); }
+        td { padding: 12px 16px; border-bottom: 1px solid var(--border); font-size: 0.9rem; vertical-align: top; }
+        tr:last-child td { border-bottom: none; }
+        .param-name { font-family: monospace; font-weight: 600; color: var(--accent2); }
+        .param-type { font-family: monospace; font-size: 0.8rem; color: var(--muted); }
+        .param-required { color: var(--accent); font-weight: 700; font-size: 0.75rem; }
+        .param-optional { color: var(--muted); font-size: 0.75rem; }
+
+        /* ─── Code Blocks ────────────────────────────────── */
+        pre {
+            background: var(--code-bg);
+            color: var(--code-text);
+            padding: 20px 24px;
+            border-radius: 10px;
+            overflow-x: auto;
+            font-family: 'Cascadia Code', 'Fira Code', monospace;
+            font-size: 0.85rem;
+            line-height: 1.6;
+            margin: 16px 0;
+            position: relative;
+        }
+        code {
+            font-family: 'Cascadia Code', 'Fira Code', monospace;
+            font-size: 0.85rem;
+        }
+        .inline-code {
+            background: #f1f3f5;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            color: var(--accent);
+        }
+        .json-key { color: #89b4fa; }
+        .json-string { color: #a6e3a1; }
+        .json-number { color: #fab387; }
+        .json-bool { color: #cba6f7; }
+        .json-null { color: #f38ba8; }
+        .comment { color: #6c7086; }
+
+        /* ─── Status Codes ───────────────────────────────── */
+        .status { display: inline-flex; align-items: center; gap: 8px; padding: 4px 12px; border-radius: 6px; font-weight: 700; font-size: 0.85rem; margin: 4px 0; }
+        .status.s200 { background: #d3f9d8; color: #2b8a3e; }
+        .status.s401 { background: #fff3bf; color: #e67700; }
+        .status.s404 { background: #ffe3e3; color: #c92a2a; }
+
+        /* ─── Enum Values ────────────────────────────────── */
+        .enum-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+            gap: 8px;
+            margin: 8px 0;
+        }
+        .enum-val {
+            background: var(--bg);
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-family: monospace;
+            font-size: 0.8rem;
+            text-align: center;
+            border: 1px solid var(--border);
+        }
+
+        /* ─── Info Box ───────────────────────────────────── */
+        .info-box {
+            padding: 16px 20px;
+            border-radius: 8px;
+            margin: 16px 0;
+            display: flex;
+            gap: 12px;
+            align-items: flex-start;
+        }
+        .info-box.tip { background: #d3f9d8; border-left: 4px solid #2b8a3e; }
+        .info-box.warning { background: #fff3bf; border-left: 4px solid #e67700; }
+        .info-box.danger { background: #ffe3e3; border-left: 4px solid #c92a2a; }
+        .info-box .icon { font-size: 1.2rem; flex-shrink: 0; }
+
+        /* ─── Footer ─────────────────────────────────────── */
+        .footer {
+            text-align: center;
+            padding: 40px 0;
+            color: var(--muted);
+            font-size: 0.85rem;
+            border-top: 1px solid var(--border);
+        }
+
+        /* ─── Responsive ─────────────────────────────────── */
+        @media (max-width: 768px) {
+            .hero h1 { font-size: 1.8rem; }
+            .endpoint-header { flex-wrap: wrap; }
+            .endpoint-desc { margin-left: 0; width: 100%; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!-- HERO -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<div class="hero">
+    <h1>🏢 API Immobilier</h1>
+    <p class="subtitle">API de Données Immobilières — Les Résidences Relief</p>
+    <span class="version-badge">v1.0 — API REST</span>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!-- NAVIGATION -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<nav class="nav-bar">
+    <div class="container">
+        <a href="#auth" class="nav-link">Authentification</a>
+        <a href="#properties" class="nav-link">Propriétés</a>
+        <a href="#projects" class="nav-link">Projets</a>
+        <a href="#enums" class="nav-link">Énumérations</a>
+        <a href="#errors" class="nav-link">Erreurs</a>
+        <a href="#examples" class="nav-link">Exemples</a>
+    </div>
+</nav>
+
+<div class="container">
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!-- BASE URL -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<section>
+    <div class="card">
+        <h3 style="margin-bottom:12px;">🌐 URL de Base</h3>
+        <pre>https://admin.reliefresidences.ma</pre>
+        <p style="margin-top:8px;color:var(--muted);">Tous les endpoints sont préfixés par <span class="inline-code">/api/v1</span></p>
+    </div>
+</section>
+
+
+<section>
+    <div class="card">
+        <h3 style="margin-bottom:12px;">Api Key</h3>
+        <pre>
+ z9vUQLf9G7fDrRmXgWmHcToNJouLdsl12B2iMU5-6Cw
+</pre>
+    </div>
+</section>
+
+
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!-- AUTHENTIFICATION -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<section id="auth">
+    <h2 class="section-title">🔐 Authentification</h2>
+
+    <div class="card">
+        <p>Tous les endpoints (sauf <span class="inline-code">/health</span>) nécessitent une <strong>clé API</strong>. Vous pouvez la fournir de deux manières :</p>
+
+        <h4 style="margin:20px 0 10px;">Option 1 — En-tête HTTP (recommandé)</h4>
+        <pre><span class="json-key">X-API-Key</span>: <span class="json-string">votre_clé_api</span></pre>
+
+        <h4 style="margin:20px 0 10px;">Option 2 — Paramètre de requête</h4>
+        <pre>GET /api/v1/properties?<span class="json-key">api_key</span>=<span class="json-string">votre_clé_api</span></pre>
+
+        <div class="info-box warning">
+            <span class="icon">⚠️</span>
+            <div><strong>Sécurité :</strong> Avec les paramètres de requête, la clé API peut apparaître dans les logs serveur et l'historique du navigateur. Utilisez la méthode par en-tête pour les intégrations en production.</div>
+        </div>
+    </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!-- PROPRIÉTÉS -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<section id="properties">
+    <h2 class="section-title">🏠 Propriétés / Unités</h2>
+
+    <!-- LISTER LES PROPRIÉTÉS -->
+    <div class="endpoint">
+        <div class="endpoint-header">
+            <span class="method get">GET</span>
+            <span class="endpoint-path">/api/v1/properties</span>
+            <span class="auth-badge required">Clé API Requise</span>
+            <span class="endpoint-desc">Lister toutes les propriétés (paginé)</span>
+        </div>
+        <div class="endpoint-body">
+            <h4>Paramètres de requête</h4>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Paramètre</th>
+                        <th>Type</th>
+                        <th>Description</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><span class="param-name">page</span></td>
+                        <td><span class="param-type">integer</span> <span class="param-optional">optionnel</span></td>
+                        <td>Numéro de page (défaut : 1)</td>
+                    </tr>
+                    <tr>
+                        <td><span class="param-name">per_page</span></td>
+                        <td><span class="param-type">integer</span> <span class="param-optional">optionnel</span></td>
+                        <td>Éléments par page (défaut : 50, max : 200)</td>
+                    </tr>
+                    <tr>
+                        <td><span class="param-name">type</span></td>
+                        <td><span class="param-type">string</span> <span class="param-optional">optionnel</span></td>
+                        <td>Type de propriété : <span class="inline-code">land</span>, <span class="inline-code">residential</span>, <span class="inline-code">commercial</span>, <span class="inline-code">industrial</span></td>
+                    </tr>
+                    <tr>
+                        <td><span class="param-name">sale_lease</span></td>
+                        <td><span class="param-type">string</span> <span class="param-optional">optionnel</span></td>
+                        <td><span class="inline-code">for_sale</span> (vente) ou <span class="inline-code">for_tenancy</span> (location)</td>
+                    </tr>
+                    <tr>
+                        <td><span class="param-name">stage</span></td>
+                        <td><span class="param-type">string</span> <span class="param-optional">optionnel</span></td>
+                        <td>Filtrer par statut (voir <a href="#enums">Énumérations</a>)</td>
+                    </tr>
+                    <tr>
+                        <td><span class="param-name">project_id</span></td>
+                        <td><span class="param-type">integer</span> <span class="param-optional">optionnel</span></td>
+                        <td>Filtrer par ID projet</td>
+                    </tr>
+                    <tr>
+                        <td><span class="param-name">bloc_id</span></td>
+                        <td><span class="param-type">integer</span> <span class="param-optional">optionnel</span></td>
+                        <td>Filtrer par ID de bloc (immeuble)</td>
+                    </tr>
+                    <tr>
+                        <td><span class="param-name">region_id</span></td>
+                        <td><span class="param-type">integer</span> <span class="param-optional">optionnel</span></td>
+                        <td>Filtrer par ID de région</td>
+                    </tr>
+                    <tr>
+                        <td><span class="param-name">min_price</span></td>
+                        <td><span class="param-type">float</span> <span class="param-optional">optionnel</span></td>
+                        <td>Prix minimum</td>
+                    </tr>
+                    <tr>
+                        <td><span class="param-name">max_price</span></td>
+                        <td><span class="param-type">float</span> <span class="param-optional">optionnel</span></td>
+                        <td>Prix maximum</td>
+                    </tr>
+                    <tr>
+                        <td><span class="param-name">min_rooms</span></td>
+                        <td><span class="param-type">integer</span> <span class="param-optional">optionnel</span></td>
+                        <td>Nombre minimum de pièces</td>
+                    </tr>
+                    <tr>
+                        <td><span class="param-name">unit_morphology</span></td>
+                        <td><span class="param-type">string</span> <span class="param-optional">optionnel</span></td>
+                        <td>Type d'unité : <span class="inline-code">studio</span>, <span class="inline-code">f2</span>, <span class="inline-code">f3</span>, <span class="inline-code">f4</span>, <span class="inline-code">duplex</span>, <span class="inline-code">villa</span>, <span class="inline-code">shop</span></td>
+                    </tr>
+                    <tr>
+                        <td><span class="param-name">search</span></td>
+                        <td><span class="param-type">string</span> <span class="param-optional">optionnel</span></td>
+                        <td>Rechercher par nom (correspondance partielle)</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h4 style="margin-top:24px;">Réponse</h4>
+            <span class="status s200">200 OK</span>
+<pre>{
+  <span class="json-key">"success"</span>: <span class="json-bool">true</span>,
+  <span class="json-key">"data"</span>: [
+    {
+      <span class="json-key">"id"</span>: <span class="json-number">623</span>,
+      <span class="json-key">"name"</span>: <span class="json-string">"APP08"</span>,
+      <span class="json-key">"code"</span>: <span class="json-string">"D-05-APP08"</span>,
+      <span class="json-key">"type"</span>: <span class="json-string">"residential"</span>,
+      <span class="json-key">"sale_lease"</span>: <span class="json-string">"for_sale"</span>,
+      <span class="json-key">"stage"</span>: <span class="json-string">"booked"</span>,
+      <span class="json-key">"price"</span>: <span class="json-number">567000</span>,
+      <span class="json-key">"currency"</span>: <span class="json-string">"MAD"</span>,
+      <span class="json-key">"total_area"</span>: <span class="json-number">42</span>,
+      <span class="json-key">"usable_area"</span>: <span class="json-number">0</span>,
+      <span class="json-key">"measure_unit"</span>: <span class="json-string">"sq_m"</span>,
+      <span class="json-key">"unit_morphology"</span>: <span class="json-string">"f2"</span>,
+      <span class="json-key">"floor"</span>: <span class="json-number">5</span>,
+      <span class="json-key">"rooms"</span>: <span class="json-number">1</span>,
+      <span class="json-key">"bathrooms"</span>: <span class="json-number">1</span>,
+      <span class="json-key">"parking"</span>: <span class="json-number">1</span>,
+      <span class="json-key">"facing"</span>: <span class="json-string">"N"</span>,
+      <span class="json-key">"city"</span>: <span class="json-string">"Marrakech"</span>,
+      <span class="json-key">"region"</span>: <span class="json-string">"Marrakech"</span>,
+      <span class="json-key">"project"</span>: {
+        <span class="json-key">"id"</span>: <span class="json-number">2</span>,
+        <span class="json-key">"name"</span>: <span class="json-string">"RELIEF I"</span>
+      },
+      <span class="json-key">"bloc"</span>: {
+        <span class="json-key">"id"</span>: <span class="json-number">12</span>,
+        <span class="json-key">"name"</span>: <span class="json-string">"Immeuble D"</span>
+      }
+    }
+  ],
+  <span class="json-key">"pagination"</span>: {
+    <span class="json-key">"page"</span>: <span class="json-number">1</span>,
+    <span class="json-key">"per_page"</span>: <span class="json-number">50</span>,
+    <span class="json-key">"total"</span>: <span class="json-number">623</span>,
+    <span class="json-key">"total_pages"</span>: <span class="json-number">13</span>
+  }
+}</pre>
+        </div>
+    </div>
+
+    <!-- DÉTAILS D'UNE PROPRIÉTÉ -->
+    <div class="endpoint">
+        <div class="endpoint-header">
+            <span class="method get">GET</span>
+            <span class="endpoint-path">/api/v1/properties/{id}</span>
+            <span class="auth-badge required">Clé API Requise</span>
+            <span class="endpoint-desc">Détails d'une propriété</span>
+        </div>
+        <div class="endpoint-body">
+            <h4>Paramètre de chemin</h4>
+            <table>
+                <thead><tr><th>Paramètre</th><th>Type</th><th>Description</th></tr></thead>
+                <tbody>
+                    <tr>
+                        <td><span class="param-name">id</span></td>
+                        <td><span class="param-type">integer</span> <span class="param-required">requis</span></td>
+                        <td>ID de la propriété</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h4 style="margin-top:24px;">Réponse — Champs supplémentaires par rapport à la liste</h4>
+            <span class="status s200">200 OK</span>
+<pre>{
+  <span class="json-key">"success"</span>: <span class="json-bool">true</span>,
+  <span class="json-key">"data"</span>: {
+    <span class="comment">// ... tous les champs de la liste +</span>
+    <span class="json-key">"street"</span>: <span class="json-string">"Lot 123, Zone Industrielle"</span>,
+    <span class="json-key">"street2"</span>: <span class="json-null">null</span>,
+    <span class="json-key">"zip"</span>: <span class="json-string">"40000"</span>,
+    <span class="json-key">"state"</span>: <span class="json-string">"Marrakech-Safi"</span>,
+    <span class="json-key">"country"</span>: <span class="json-string">"Morocco"</span>,
+    <span class="json-key">"latitude"</span>: <span class="json-string">"31.6295"</span>,
+    <span class="json-key">"longitude"</span>: <span class="json-string">"-7.9811"</span>,
+    <span class="json-key">"total_floor"</span>: <span class="json-number">6</span>,
+    <span class="json-key">"has_underground"</span>: <span class="json-bool">true</span>,
+    <span class="json-key">"underground_area"</span>: <span class="json-number">25.0</span>,
+    <span class="json-key">"pricing_type"</span>: <span class="json-string">"fixed"</span>,
+    <span class="json-key">"price_per_area"</span>: <span class="json-number">0</span>,
+    <span class="json-key">"rent_unit"</span>: <span class="json-null">null</span>,
+    <span class="json-key">"amenities"</span>: [<span class="json-string">"Piscine"</span>, <span class="json-string">"Parking"</span>, <span class="json-string">"Sécurité 24/7"</span>],
+    <span class="json-key">"specifications"</span>: [<span class="json-string">"Double vitrage"</span>],
+    <span class="json-key">"tags"</span>: [<span class="json-string">"Premium"</span>, <span class="json-string">"Vue mer"</span>],
+    <span class="json-key">"images"</span>: [
+      { <span class="json-key">"id"</span>: <span class="json-number">15</span>, <span class="json-key">"title"</span>: <span class="json-string">"Facade"</span> }
+    ],
+    <span class="json-key">"landlord"</span>: {
+      <span class="json-key">"name"</span>: <span class="json-string">"Ahmed Benani"</span>,
+      <span class="json-key">"phone"</span>: <span class="json-string">"+212 6XX XXX XXX"</span>,
+      <span class="json-key">"email"</span>: <span class="json-string">"ahmed@example.com"</span>
+    }
+  }
+}</pre>
+        </div>
+    </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!-- PROJETS -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<section id="projects">
+    <h2 class="section-title">🏗️ Projets</h2>
+
+    <!-- LISTER LES PROJETS -->
+    <div class="endpoint">
+        <div class="endpoint-header">
+            <span class="method get">GET</span>
+            <span class="endpoint-path">/api/v1/projects</span>
+            <span class="auth-badge required">Clé API Requise</span>
+            <span class="endpoint-desc">Lister tous les projets</span>
+        </div>
+        <div class="endpoint-body">
+            <h4>Paramètres de requête</h4>
+            <table>
+                <thead><tr><th>Paramètre</th><th>Type</th><th>Description</th></tr></thead>
+                <tbody>
+                    <tr>
+                        <td><span class="param-name">page</span></td>
+                        <td><span class="param-type">integer</span> <span class="param-optional">optionnel</span></td>
+                        <td>Numéro de page (défaut : 1)</td>
+                    </tr>
+                    <tr>
+                        <td><span class="param-name">per_page</span></td>
+                        <td><span class="param-type">integer</span> <span class="param-optional">optionnel</span></td>
+                        <td>Éléments par page (défaut : 50, max : 200)</td>
+                    </tr>
+                    <tr>
+                        <td><span class="param-name">status</span></td>
+                        <td><span class="param-type">string</span> <span class="param-optional">optionnel</span></td>
+                        <td><span class="inline-code">draft</span>, <span class="inline-code">available</span>, <span class="inline-code">cancel</span>, <span class="inline-code">closed</span></td>
+                    </tr>
+                    <tr>
+                        <td><span class="param-name">project_for</span></td>
+                        <td><span class="param-type">string</span> <span class="param-optional">optionnel</span></td>
+                        <td><span class="inline-code">rent</span> (location) ou <span class="inline-code">sale</span> (vente)</td>
+                    </tr>
+                    <tr>
+                        <td><span class="param-name">property_type</span></td>
+                        <td><span class="param-type">string</span> <span class="param-optional">optionnel</span></td>
+                        <td><span class="inline-code">residential</span>, <span class="inline-code">commercial</span>, <span class="inline-code">industrial</span>, <span class="inline-code">land</span></td>
+                    </tr>
+                    <tr>
+                        <td><span class="param-name">search</span></td>
+                        <td><span class="param-type">string</span> <span class="param-optional">optionnel</span></td>
+                        <td>Rechercher par nom de projet</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h4 style="margin-top:24px;">Réponse</h4>
+            <span class="status s200">200 OK</span>
+<pre>{
+  <span class="json-key">"success"</span>: <span class="json-bool">true</span>,
+  <span class="json-key">"data"</span>: [
+    {
+      <span class="json-key">"id"</span>: <span class="json-number">2</span>,
+      <span class="json-key">"name"</span>: <span class="json-string">"RELIEF I"</span>,
+      <span class="json-key">"code"</span>: <span class="json-string">"RI"</span>,
+      <span class="json-key">"project_for"</span>: <span class="json-string">"sale"</span>,
+      <span class="json-key">"property_type"</span>: <span class="json-string">"residential"</span>,
+      <span class="json-key">"status"</span>: <span class="json-string">"available"</span>,
+      <span class="json-key">"date_of_project"</span>: <span class="json-string">"2024-01-15"</span>,
+      <span class="json-key">"construction_year"</span>: <span class="json-string">"2023"</span>,
+      <span class="json-key">"region"</span>: <span class="json-string">"Marrakech"</span>,
+      <span class="json-key">"city"</span>: <span class="json-string">"Marrakech"</span>,
+      <span class="json-key">"country"</span>: <span class="json-string">"Morocco"</span>,
+      <span class="json-key">"latitude"</span>: <span class="json-string">"31.6295"</span>,
+      <span class="json-key">"longitude"</span>: <span class="json-string">"-7.9811"</span>,
+      <span class="json-key">"blocs_count"</span>: <span class="json-number">5</span>,
+      <span class="json-key">"units_count"</span>: <span class="json-number">120</span>
+    }
+  ],
+  <span class="json-key">"pagination"</span>: { <span class="comment">...</span> }
+}</pre>
+        </div>
+    </div>
+
+    <!-- DÉTAILS D'UN PROJET -->
+    <div class="endpoint">
+        <div class="endpoint-header">
+            <span class="method get">GET</span>
+            <span class="endpoint-path">/api/v1/projects/{id}</span>
+            <span class="auth-badge required">Clé API Requise</span>
+            <span class="endpoint-desc">Détails du projet avec blocs et unités</span>
+        </div>
+        <div class="endpoint-body">
+            <h4>Réponse — Inclut les blocs et toutes les unités</h4>
+            <span class="status s200">200 OK</span>
+<pre>{
+  <span class="json-key">"success"</span>: <span class="json-bool">true</span>,
+  <span class="json-key">"data"</span>: {
+    <span class="comment">// ... tous les champs de la liste +</span>
+    <span class="json-key">"street"</span>: <span class="json-string">"Route de l'Ourika, Km 5"</span>,
+    <span class="json-key">"blocs"</span>: [
+      {
+        <span class="json-key">"id"</span>: <span class="json-number">12</span>,
+        <span class="json-key">"name"</span>: <span class="json-string">"Immeuble D"</span>,
+        <span class="json-key">"code"</span>: <span class="json-string">"D"</span>,
+        <span class="json-key">"total_floors"</span>: <span class="json-number">6</span>,
+        <span class="json-key">"units_count"</span>: <span class="json-number">24</span>
+      }
+    ],
+    <span class="json-key">"units"</span>: [
+      <span class="comment">// Tableau d'objets propriété (même format que /properties liste)</span>
+    ]
+  }
+}</pre>
+        </div>
+    </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!-- VÉRIFICATION DE SANTÉ -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<section>
+    <h2 class="section-title">💚 Vérification de Santé</h2>
+
+    <div class="endpoint">
+        <div class="endpoint-header">
+            <span class="method get">GET</span>
+            <span class="endpoint-path">/api/v1/health</span>
+            <span class="auth-badge public">Public</span>
+            <span class="endpoint-desc">Vérifier si l'API fonctionne</span>
+        </div>
+        <div class="endpoint-body">
+            <span class="status s200">200 OK</span>
+<pre>{
+  <span class="json-key">"success"</span>: <span class="json-bool">true</span>,
+  <span class="json-key">"status"</span>: <span class="json-string">"ok"</span>,
+  <span class="json-key">"service"</span>: <span class="json-string">"property-api"</span>,
+  <span class="json-key">"version"</span>: <span class="json-string">"1.0"</span>
+}</pre>
+        </div>
+    </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!-- ÉNUMÉRATIONS -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<section id="enums">
+    <h2 class="section-title">📋 Énumérations</h2>
+
+    <div class="card">
+        <h4>Statut de Propriété (stage)</h4>
+        <table>
+            <thead><tr><th>Valeur</th><th>Description</th></tr></thead>
+            <tbody>
+                <tr><td><span class="inline-code">draft</span></td><td>Brouillon</td></tr>
+                <tr><td><span class="inline-code">available</span></td><td>Disponible</td></tr>
+                <tr><td><span class="inline-code">pre_sale</span></td><td>Pré-vente</td></tr>
+                <tr><td><span class="inline-code">booked</span></td><td>Réservé</td></tr>
+                <tr><td><span class="inline-code">on_lease</span></td><td>En location</td></tr>
+                <tr><td><span class="inline-code">sale</span></td><td>En vente</td></tr>
+                <tr><td><span class="inline-code">administration</span></td><td>Administration</td></tr>
+                <tr><td><span class="inline-code">sold</span></td><td>Vendu</td></tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="card">
+        <h4>Type de Propriété (type)</h4>
+        <div class="enum-grid">
+            <div class="enum-val">land</div>
+            <div class="enum-val">residential</div>
+            <div class="enum-val">commercial</div>
+            <div class="enum-val">industrial</div>
+        </div>
+    </div>
+
+    <div class="card">
+        <h4>Type d'Unité (unit_morphology)</h4>
+        <table>
+            <thead><tr><th>Valeur</th><th>Libellé</th></tr></thead>
+            <tbody>
+                <tr><td><span class="inline-code">studio</span></td><td>Studio / F1</td></tr>
+                <tr><td><span class="inline-code">f2</span></td><td>F2 (2 pièces)</td></tr>
+                <tr><td><span class="inline-code">f3</span></td><td>F3 (3 pièces)</td></tr>
+                <tr><td><span class="inline-code">f4</span></td><td>F4 (4 pièces)</td></tr>
+                <tr><td><span class="inline-code">duplex</span></td><td>Duplex</td></tr>
+                <tr><td><span class="inline-code">villa</span></td><td>Villa</td></tr>
+                <tr><td><span class="inline-code">shop</span></td><td>Magasin / Commercial</td></tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="card">
+        <h4>Vente / Location (sale_lease)</h4>
+        <div class="enum-grid">
+            <div class="enum-val">for_sale</div>
+            <div class="enum-val">for_tenancy</div>
+        </div>
+    </div>
+
+    <div class="card">
+        <h4>Orientation (facing)</h4>
+        <div class="enum-grid">
+            <div class="enum-val">N</div>
+            <div class="enum-val">E</div>
+            <div class="enum-val">S</div>
+            <div class="enum-val">W</div>
+            <div class="enum-val">NE</div>
+            <div class="enum-val">SE</div>
+            <div class="enum-val">SW</div>
+            <div class="enum-val">NW</div>
+        </div>
+    </div>
+
+    <div class="card">
+        <h4>Unité de Mesure (measure_unit)</h4>
+        <div class="enum-grid">
+            <div class="enum-val">sq_ft (ft²)</div>
+            <div class="enum-val">sq_m (m²)</div>
+            <div class="enum-val">sq_yd (yd²)</div>
+            <div class="enum-val">cu_ft (ft³)</div>
+            <div class="enum-val">cu_m (m³)</div>
+        </div>
+    </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!-- ERREURS -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<section id="errors">
+    <h2 class="section-title">⚠️ Gestion des Erreurs</h2>
+
+    <div class="card">
+        <p>Toutes les erreurs suivent ce format :</p>
+<pre>{
+  <span class="json-key">"success"</span>: <span class="json-bool">false</span>,
+  <span class="json-key">"error"</span>: <span class="json-string">"Message d'erreur ici"</span>
+}</pre>
+
+        <h4 style="margin-top:24px;">Codes de Statut</h4>
+        <table>
+            <thead><tr><th>Code</th><th>Description</th></tr></thead>
+            <tbody>
+                <tr>
+                    <td><span class="status s200">200</span></td>
+                    <td>Succès</td>
+                </tr>
+                <tr>
+                    <td><span class="status s401">401</span></td>
+                    <td>Clé API invalide ou manquante</td>
+                </tr>
+                <tr>
+                    <td><span class="status s404">404</span></td>
+                    <td>Ressource non trouvée</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!-- EXEMPLES -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<section id="examples">
+    <h2 class="section-title">🚀 Exemples</h2>
+
+    <div class="card">
+        <h4>cURL</h4>
+<pre><span class="comment"># Vérification de santé</span>
+curl https://admin.reliefresidences.ma/api/v1/health
+
+<span class="comment"># Lister toutes les propriétés résidentielles disponibles à la vente</span>
+curl -H "<span class="json-key">X-API-Key</span>: <span class="json-string">VOTRE_CLÉ</span>" \
+  "https://admin.reliefresidences.ma/api/v1/properties?type=residential&stage=available&sale_lease=for_sale"
+
+<span class="comment"># Obtenir les F3 entre 500K et 800K MAD</span>
+curl -H "<span class="json-key">X-API-Key</span>: <span class="json-string">VOTRE_CLÉ</span>" \
+  "https://admin.reliefresidences.ma/api/v1/properties?unit_morphology=f3&min_price=500000&max_price=800000"
+
+<span class="comment"># Obtenir toutes les unités du projet ID 2</span>
+curl -H "<span class="json-key">X-API-Key</span>: <span class="json-string">VOTRE_CLÉ</span>" \
+  "https://admin.reliefresidences.ma/api/v1/properties?project_id=2"
+
+<span class="comment"># Obtenir les détails d'un projet avec ses blocs</span>
+curl -H "<span class="json-key">X-API-Key</span>: <span class="json-string">VOTRE_CLÉ</span>" \
+  "https://admin.reliefresidences.ma/api/v1/projects/2"
+
+<span class="comment"># Pagination : page 3, 20 éléments par page</span>
+curl -H "<span class="json-key">X-API-Key</span>: <span class="json-string">VOTRE_CLÉ</span>" \
+  "https://admin.reliefresidences.ma/api/v1/properties?page=3&per_page=20"</pre>
+    </div>
+
+    <div class="card">
+        <h4>Python</h4>
+<pre><span class="comment"># pip install requests</span>
+import requests
+
+BASE_URL = "https://admin.reliefresidences.ma/api/v1"
+HEADERS = {"X-API-Key": "VOTRE_CLÉ"}
+
+<span class="comment"># Lister les propriétés disponibles</span>
+response = requests.get(
+    f"{BASE_URL}/properties",
+    headers=HEADERS,
+    params={
+        "stage": "available",
+        "type": "residential",
+        "per_page": 100,
+    }
+)
+data = response.json()
+
+for prop in data["data"]:
+    print(f"{prop['code']} — {prop['name']} — {prop['price']} {prop['currency']}")
+
+print(f"Total : {data['pagination']['total']} propriétés")</pre>
+    </div>
+
+    <div class="card">
+        <h4>JavaScript / Node.js</h4>
+<pre><span class="comment">// Utilisation de fetch</span>
+const BASE_URL = "https://admin.reliefresidences.ma/api/v1";
+const API_KEY = "VOTRE_CLÉ";
+
+async function getProperties(filters = {}) {
+  const params = new URLSearchParams(filters);
+  const response = await fetch(
+    `${BASE_URL}/properties?${params}`,
+    { headers: { "X-API-Key": API_KEY } }
+  );
+  return response.json();
+}
+
+<span class="comment">// Obtenir tous les F2 réservés</span>
+const result = await getProperties({
+  stage: "booked",
+  unit_morphology: "f2",
+});
+
+console.log(`Trouvé ${result.pagination.total} propriétés`);
+result.data.forEach(p =>
+  console.log(`${p.code} — ${p.name} — ${p.price} ${p.currency}`)
+);</pre>
+    </div>
+
+    <div class="card">
+        <h4>n8n (Nœud HTTP Request)</h4>
+        <p style="margin-bottom:12px;">Configurez le nœud HTTP Request comme suit :</p>
+        <table>
+            <tbody>
+                <tr><td style="font-weight:700;width:180px;">Méthode</td><td>GET</td></tr>
+                <tr><td style="font-weight:700;">URL</td><td><span class="inline-code">https://admin.reliefresidences.ma/api/v1/properties</span></td></tr>
+                <tr><td style="font-weight:700;">Authentification</td><td>Header Auth → Nom : <span class="inline-code">X-API-Key</span> → Valeur : <span class="inline-code">VOTRE_CLÉ</span></td></tr>
+                <tr><td style="font-weight:700;">Paramètres</td><td>Ajoutez les filtres souhaités (stage, type, etc.)</td></tr>
+            </tbody>
+        </table>
+    </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!-- RÉFÉRENCE DES CHAMPS -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<section>
+    <h2 class="section-title">📖 Référence des Champs</h2>
+
+    <div class="card">
+        <h4>Objet Propriété — Champs de Liste</h4>
+        <table>
+            <thead><tr><th>Champ</th><th>Type</th><th>Description</th></tr></thead>
+            <tbody>
+                <tr><td><span class="param-name">id</span></td><td><span class="param-type">integer</span></td><td>Identifiant unique</td></tr>
+                <tr><td><span class="param-name">name</span></td><td><span class="param-type">string</span></td><td>Nom (ex: "APP08")</td></tr>
+                <tr><td><span class="param-name">code</span></td><td><span class="param-type">string</span></td><td>Code propriété (ex: "D-05-APP08")</td></tr>
+                <tr><td><span class="param-name">type</span></td><td><span class="param-type">string</span></td><td>Type de propriété</td></tr>
+                <tr><td><span class="param-name">sale_lease</span></td><td><span class="param-type">string</span></td><td>Vente ou location</td></tr>
+                <tr><td><span class="param-name">stage</span></td><td><span class="param-type">string</span></td><td>Statut actuel</td></tr>
+                <tr><td><span class="param-name">price</span></td><td><span class="param-type">float</span></td><td>Prix dans la devise</td></tr>
+                <tr><td><span class="param-name">currency</span></td><td><span class="param-type">string</span></td><td>Code devise (MAD)</td></tr>
+                <tr><td><span class="param-name">total_area</span></td><td><span class="param-type">float</span></td><td>Surface totale</td></tr>
+                <tr><td><span class="param-name">usable_area</span></td><td><span class="param-type">float</span></td><td>Surface habitable</td></tr>
+                <tr><td><span class="param-name">measure_unit</span></td><td><span class="param-type">string</span></td><td>Unité de mesure</td></tr>
+                <tr><td><span class="param-name">unit_morphology</span></td><td><span class="param-type">string|null</span></td><td>Type d'unité (studio, f2, etc.)</td></tr>
+                <tr><td><span class="param-name">floor</span></td><td><span class="param-type">integer</span></td><td>Numéro d'étage</td></tr>
+                <tr><td><span class="param-name">rooms</span></td><td><span class="param-type">integer</span></td><td>Nombre de pièces</td></tr>
+                <tr><td><span class="param-name">bathrooms</span></td><td><span class="param-type">integer</span></td><td>Nombre de salles de bain</td></tr>
+                <tr><td><span class="param-name">parking</span></td><td><span class="param-type">integer</span></td><td>Places de parking</td></tr>
+                <tr><td><span class="param-name">facing</span></td><td><span class="param-type">string</span></td><td>Orientation (N, S, E, W...)</td></tr>
+                <tr><td><span class="param-name">city</span></td><td><span class="param-type">string|null</span></td><td>Nom de la ville</td></tr>
+                <tr><td><span class="param-name">region</span></td><td><span class="param-type">string|null</span></td><td>Nom de la région</td></tr>
+                <tr><td><span class="param-name">project</span></td><td><span class="param-type">object|null</span></td><td>{id, name} du projet parent</td></tr>
+                <tr><td><span class="param-name">bloc</span></td><td><span class="param-type">object|null</span></td><td>{id, name} du bloc/immeuble</td></tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="card">
+        <h4>Objet Propriété — Champs Détail uniquement (supplémentaires)</h4>
+        <table>
+            <thead><tr><th>Champ</th><th>Type</th><th>Description</th></tr></thead>
+            <tbody>
+                <tr><td><span class="param-name">street</span></td><td><span class="param-type">string|null</span></td><td>Adresse</td></tr>
+                <tr><td><span class="param-name">zip</span></td><td><span class="param-type">string|null</span></td><td>Code postal</td></tr>
+                <tr><td><span class="param-name">state</span></td><td><span class="param-type">string|null</span></td><td>Province / Région</td></tr>
+                <tr><td><span class="param-name">country</span></td><td><span class="param-type">string|null</span></td><td>Pays</td></tr>
+                <tr><td><span class="param-name">latitude</span></td><td><span class="param-type">string|null</span></td><td>GPS latitude</td></tr>
+                <tr><td><span class="param-name">longitude</span></td><td><span class="param-type">string|null</span></td><td>GPS longitude</td></tr>
+                <tr><td><span class="param-name">total_floor</span></td><td><span class="param-type">integer</span></td><td>Nombre total d'étages</td></tr>
+                <tr><td><span class="param-name">has_underground</span></td><td><span class="param-type">boolean</span></td><td>Possède un sous-sol</td></tr>
+                <tr><td><span class="param-name">underground_area</span></td><td><span class="param-type">float</span></td><td>Surface sous-sol (m²)</td></tr>
+                <tr><td><span class="param-name">pricing_type</span></td><td><span class="param-type">string</span></td><td><span class="inline-code">fixed</span> / <span class="inline-code">area_wise</span></td></tr>
+                <tr><td><span class="param-name">price_per_area</span></td><td><span class="param-type">float</span></td><td>Prix par unité de surface</td></tr>
+                <tr><td><span class="param-name">rent_unit</span></td><td><span class="param-type">string|null</span></td><td>Day / Month / Year (location seulement)</td></tr>
+                <tr><td><span class="param-name">amenities</span></td><td><span class="param-type">string[]</span></td><td>Liste des équipements</td></tr>
+                <tr><td><span class="param-name">specifications</span></td><td><span class="param-type">string[]</span></td><td>Liste des spécifications</td></tr>
+                <tr><td><span class="param-name">tags</span></td><td><span class="param-type">string[]</span></td><td>Liste des étiquettes</td></tr>
+                <tr><td><span class="param-name">images</span></td><td><span class="param-type">object[]</span></td><td>[{id, title}] références d'images</td></tr>
+                <tr><td><span class="param-name">landlord</span></td><td><span class="param-type">object|null</span></td><td>{name, phone, email} du propriétaire</td></tr>
+            </tbody>
+        </table>
+    </div>
+</section>
+
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!-- FOOTER -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<div class="footer">
+    <p>API Immobilier v1.0 — Les Résidences Relief — Généré Avril 2026</p>
+</div>
+
+</body>
+</html>
